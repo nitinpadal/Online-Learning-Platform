@@ -2,30 +2,39 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'nitinpadal/online-learning-platform'
+        // Define environment variables here
+        VITE_SUPABASE_URL = "https://drxkyetzufqmpkngaetz.supabase.co"
+        VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyeGt5ZXR6dWZxbXBrbmdhZXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NTU2OTMsImV4cCI6MjA2MDIzMTY5M30.0XTjyx38PhkAu5Y76cc2IRL4XuIngse5HJt8sqmbPMg"
     }
 
     stages {
-        stage('Clone Repo') {
+        stage('Checkout Source Code') {
             steps {
-                git credentialsId: 'your-credentials-id',  // Replace with the Jenkins credential ID
+                git credentialsId: 'github-credentials', 
                     url: 'https://github.com/nitinpadal/Online-Learning-Platform.git',
                     branch: 'main'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Install Dependencies') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh 'npm install'
             }
         }
 
-        stage('Push to DockerHub') {
+        stage('Build Project') {
             steps {
-                withDockerRegistry([ credentialsId: 'dockerhub-credentials-id', url: '' ]) {
-                    sh 'docker push $IMAGE_NAME'
-                }
+                sh 'npm run build'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
